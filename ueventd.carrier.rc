@@ -1,0 +1,41 @@
+# Felica
+/dev/felica               0666    root      root
+/dev/felica_pon           0666    root      root
+/dev/felica_cen           0666    root      root
+/dev/felica_rfs           0444    root      root
+/dev/felica_rws           0666    root      root
+/dev/felica_ant           0666    root      root
+/dev/felica_int_poll      0400    root      root
+/dev/felica_uid           0222    root      root
+
+# NFC
+/dev/ttyHSL2              0660    nfc       nfc
+/dev/snfc_uart            0660    nfc       nfc
+/dev/snfc_pon             0220    nfc       nfc
+/dev/snfc_hsel            0666    nfc       nfc
+/dev/snfc_intu_poll       0444    nfc       nfc
+/dev/snfc_available_poll  0440    nfc       nfc
+/dev/snfc_rfs             0444    nfc       nfc
+/dev/snfc_rfs_poll        0440    nfc       nfc
+/dev/uartcc               0660    nfc       nfc
+
+# ISDB-Tmm 
+/dev/mmtuneri2c			  0666	 system      root		
+/dev/mmtunerspi			  0666	 system		 root
+
+# Tmm Add start
+/dev/hw_random            0664   system     system
+# Tmm Add end
+
+#JPN CPRM
+/dev/block/mmcblk1	0660	root	system
+
+# tzic driver
+/dev/tzic				  0644	 system		system
+
+# MDM devices (for Write protection)
+/dev/block/mmcblk0p13     0660	system	    radio
+/dev/block/mmcblk0p14     0660	system	    radio
+/dev/block/mmcblk0p15     0660	system	    radio
+/dev/block/mmcblk0p16     0600	root        root
+/dev/block/mmcblk0p17     0600	root        root

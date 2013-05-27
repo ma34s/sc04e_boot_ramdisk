@@ -1,0 +1,222 @@
+# Copyright (c) 2009-2012, Code Aurora Forum. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Code Aurora nor
+#       the names of its contributors may be used to endorse or promote
+#       products derived from this software without specific prior written
+#       permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NON-INFRINGEMENT ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+on init
+    
+     # For Absolute Persistence Partition
+    mkdir /persdata 0755 system system
+    mkdir /persdata/absolute 0750 system system
+
+    wait /dev/block/mmcblk0p26
+    mount ext4 /dev/block/mmcblk0p26 /persdata/absolute nosuid nodev barrier=1
+    chown system system /persdata
+    chmod 0755 /persdata
+    chown system system /persdata/absolute
+    chmod 0750 /persdata/absolute
+
+    export EXTERNAL_STORAGE_DOCOMO /storage/extSdCard
+    mkdir /preload 0771 system system   
+	
+on post-fs-data
+    setprop ro.3lm.production 1
+    setprop ro.3LM.extended 1
+    setprop ro.3LM.oem_sd_encryption 1
+    setprop ro.3LM.oem_manifest 3	
+    
+#FSI {Tmm] Add Start (121224)
+    mkdir /data/mmb
+    mkdir /data/mmb/MmbCaCasDrmMw 0700 casdrm sdcard_rw
+    mkdir /data/mmb/MmbFcCtlMw 0700 fcctl sdcard_rw
+    mkdir /data/mmb/MmbFcCtlMw/dic 0700 fcctl sdcard_rw
+    mkdir /data/mmb/MmbStCtlMw 0700 stctl sdcard_rw
+    mkdir /data/mmb/MmbFcMp4Mw 0700 fcmp4 sdcard_rw
+    mkdir /data/mmb/common 0775 root sdcard_rw
+    mkdir /data/mmb/common/MmbFcCtlMw 0700 fcctl sdcard_rw
+        chown root mmb /data/mmb
+
+    mkdir data/mmb/common/fcctl 0775 fcctl sdcard_rw
+        chown fcctl sdcard_rw data/mmb/common/fcctl
+
+    mkdir data/mmb/common/streccm 0775 streccm sdcard_rw
+        chown streccm sdcard_rw data/mmb/common/streccm
+
+    chmod 775 /data/mmb
+    mkdir /data/mmb/MmbFcCtlMwMnt
+    chown fcctl sdcard_rw /data/mmb/MmbFcCtlMwMnt
+    chmod 700 /data/mmb/MmbFcCtlMwMnt
+
+	mkdir /data/data/.drm/.sec_sctime  
+	chmod 775 /data/data/.drm/.sec_sctime 
+	chown system system /data/data/.drm/.sec_sctime
+	
+#FSI {Tmm] Add End (121224)
+
+# NFC
+    symlink /dev/felica_cen /dev/snfc_cen
+
+# FeliCa
+    mkdir /efs/FeliCaLock 0770 system felicalock
+
+# Permissions for Camera
+    chown media system /sys/class/camera/flash/movie_brightness
+
+on boot
+    
+# permissions for bluetooth.
+    setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
+    chown bluetooth net_bt_stack ro.bt.bdaddr_path
+    chown bluetooth net_bt_stack /dev/ttyHS0
+    chmod 0660 /dev/ttyHS0
+    chmod 0660 /sys/class/rfkill/rfkill0/state
+    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
+    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
+
+# bluetooth LPM
+    chmod 0220 /proc/bluetooth/sleep/lpm
+    chmod 0220 /proc/bluetooth/sleep/btwrite
+    chown bluetooth net_bt_stack /proc/bluetooth/sleep/lpm
+    chown bluetooth net_bt_stack /proc/bluetooth/sleep/btwrite
+    chmod 0600 /dev/btlock
+    chown bluetooth bluetooth /dev/btlock
+    
+	chown radio system /sys/class/sec/switch/usb_sel
+	chown radio system /sys/class/sec/switch/usb_state
+	chown radio system /sys/class/sec/switch/uart_sel
+	chown radio system /sys/class/sec/switch/chg_type
+	chown radio system /sys/class/sec/switch/apo_factory
+
+# JPN: Create folder for Remote Lock service
+    mkdir /data/system 0775 system system
+
+# JPN: For MobileTV [ISDBT] \android\device\samsung\jaltedcm\init.jfltedcm.rc
+    chown system system /dev/isdbt
+    chmod 0660 /dev/isdbt
+    chown system system /dev/s3c-tsi
+    chmod 0660 /dev/s3c-tsi
+
+# JPN: For MobileTV [ISDBT] \android\device\samsung\jaltedcm\init.jfltedcm.rc
+    mkdir /data/atsc-mh 0775 system system
+    mkdir /data/one-seg 0775 system system
+    chown system system /data/atsc-mh
+    chown system system /data/one-seg
+    chmod 0775 /data/atsc-mh
+    chmod 0775 /data/one-seg   
+ 
+
+# JPN: For MobileTV [ISDBT] \android\device\samsung\jaltedcm\init.jfltedcm.rc
+service nexplayer /system/bin/nexprocess
+    class main
+    user system
+    group system radio audio camera graphics inet net_bt net_bt_admin net_raw sdcard_rw shell
+	
+service mobileTV /system/bin/broadcastProcessObserver
+    class main
+    user system
+    group system radio audio camera graphics inet net_bt net_bt_admin net_raw sdcard_rw shell
+
+
+# TVout
+service TvoutService_C /system/bin/bintvoutservice
+    class main
+    user system
+    group system
+
+# MM Property
+on property:sys.qseecomd.enable=true
+    exec /system/bin/scranton_RD
+
+# Runtime Compcache
+service rtccinit /system/bin/rtcc_init -a 400M
+    class core
+    user root
+    oneshot
+
+# add for pre-installer
+on property:persist.sys.storage_preload=1
+    mount ext4 /dev/block/platform/msm_sdcc.1/by-name/hidden /preload nosuid nodev noatime wait ro
+    setprop storage.preload.complete 1
+
+on property:persist.sys.storage_preload=0
+    exec /system/bin/umount /preload
+
+# JPN: remote lock
+service init_devadmin /system/vendor/bin/init_devadmin.sh
+    user system
+    group system
+    oneshot
+
+
+# docomo virus scan - start daemon
+service mfescand /system/bin/mfescand 
+    class main
+    socket mfescand stream 600 system system
+
+# Felica
+service mfsc /system/bin/mfsc
+    class core
+    user root
+    group system
+    oneshot
+    
+service mfdp /system/bin/mfdp
+    class core
+    user root
+    group system
+    oneshot
+
+#FSI {Tmm] Add Start (121224)
+service mmbcacasdrmmw /system/bin/MmbCaCasDrmMw
+    class main
+    socket MmbCaCasDrmMw stream 666
+#    user root
+#    group mmb radio system inet sdcard_rw media_rw
+
+service mmbfcctlmw /system/bin/MmbFcCtlMw
+    class main
+#    user root
+#    group mmb system sdcard_rw media_rw
+
+service mmbstservice /system/bin/MmbStCtlMwService
+    class main
+#    user root
+#    group mmb
+
+service mmbmp4 /system/bin/MmbFcMp4MwServer
+    class main
+#    user root
+#    group mmb
+
+service mmbfclicemw /system/bin/MmbFcLiceMwServer
+    class main
+#    user root
+#    group mmb
+
+service mmbcmservice /system/bin/MmbStRecCmMwService
+    class late_start
+#    user root
+#    group mmb
+#FSI {Tmm] Add End (121224)
+
